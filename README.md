@@ -8,173 +8,237 @@ This system replaces Unity’s NavMesh with a true 3D octree-based pathfinding s
 3. Multiplayer server-authoritative movement
 4. Dynamic obstacle-heavy worlds
 
-# System Overview
+---
+
+## System Overview
 
 This project implements:
-1. Octree-based spatial partitioning
-2. Custom A* graph search
-3. Traffic-aware path diversification
-4. Server-authoritative multiplayer movement
-5. Physics-validated movement execution
-6. Behavior-tree-driven AI logic
-7. Interpolation-based network smoothing
+1. Octree-based spatial partitioning (adaptive + full subdivision)
+2. Leaf graph extraction and connectivity building
+3. Custom 3D A* search with optional dynamic penalties
+4. Traffic-aware path diversification (reservation-based)
+5. Server-authoritative physics movement with client smoothing
+6. Behavior-tree-driven AI using a blackboard pattern
+7. Match flow support (map generation, AI spawning, capture zones)
+8. Steam lobby / UDP connection startup flow
 
-# Octree Spatial Partitioning
+---
 
-<p align="center"> <img src="Documents/Images/Spatial-partitioning-of-the-octree-structure-Left-A-voxelized-version-of-the-Stanford.png" width="900"/> </p>
+## Why Not Unity NavMesh (for this use case)
 
-The world is subdivided into a hierarchical octree structure enabling efficient spatial queries and volumetric navigation.
+Unity NavMesh is excellent for surface traversal, but it is not designed for true volumetric 3D movement (e.g., space / zero-gravity). This project targets 3D navigation through volume, not across a surface.
 
-Key features:
-1. Adaptive subdivision
-2. Configurable minimum leaf size
-3. Mesh-aware occupancy validation
-4. Broad-phase obstacle insertion
-5. Leaf-level connectivity extraction
-6. Scalable world bounds
+<p align="center">
+  <img src="Documents/Images/7F0CZ.png" width="900" />
+</p>
 
-This allows true 3D navigation rather than surface-based traversal.
+---
 
-# Large-Scale Leaf Graph Extraction
+## Multiplayer Architecture (Server Authority)
 
-<p align="center"> <img src="Documents/Images/qapH8.png" width="900"/> </p>
+Movement and pathing are computed on the server. Clients receive state updates and smoothly interpolate toward authoritative positions.
 
-Navigable leaves are extracted and converted into a graph structure.
+<p align="center">
+  <img src="Documents/Images/Hybrid-architecture-for-client-server-mobile-multiplayer-games.png" width="900" />
+</p>
 
-Each leaf node:
-1. Represents empty traversable space
-2. Maintains adjacency links
-3. Stores spatial bounds
-4. Supports dynamic penalty injection
+<p align="center">
+  <img src="Documents/Images/server-authoritative-f91558362b208ca10eae39e25dd9698d.png" width="900" />
+</p>
 
-This graph is used as the foundation for A* search.
+---
 
-# Custom A* Pathfinding
+## Octree Spatial Partitioning
 
-<p align="center"> <img src="Documents/Images/gPeMi.png" width="900"/> </p>
+The world volume is subdivided into hierarchical nodes, enabling efficient spatial queries, obstacle insertion, and volumetric navigation.
 
-The system implements a fully custom A* algorithm with:
+<p align="center">
+  <img src="Documents/Images/Figure-Octree-structure-image-a-shows-the-subdivision-in-cubes-image-b-the-tree.png" width="900" />
+</p>
+
+Octree decomposition is used to represent navigable free space and blocked regions at different resolutions.
+
+<p align="center">
+  <img src="Documents/Images/Example-of-octree-decomposition.png" width="900" />
+</p>
+
+---
+
+## Runtime Octree Debug View
+
+This project includes visualization to inspect subdivision levels and leaf occupancy during development.
+
+<p align="center">
+  <img src="Documents/Images/octree_example_screen_mini.png" width="900" />
+</p>
+
+A reference-style visualization of dense subdivision in complex geometry (useful to communicate the concept clearly in documentation).
+
+<p align="center">
+  <img src="Documents/Images/Spatial-partitioning-of-the-octree-structure-Left-A-voxelized-version-of-the-Stanford.png" width="900" />
+</p>
+
+---
+
+## Obstacle Collection and Leaf Validation
+
+Obstacles are collected from physics colliders inside a defined world bounds volume. Leaves can be validated using physics overlap checks for geometry-accurate occupancy.
+
+<p align="center">
+  <img src="Documents/Images/fig1-1.png" width="900" />
+</p>
+
+---
+
+## Leaf Graph Extraction (Connectivity)
+
+Empty leaves are collected and converted into a connectivity graph (face neighbors plus additional adjacency linking). This graph becomes the base structure for A*.
+
+<p align="center">
+  <img src="Documents/Images/qapH8.png" width="900" />
+</p>
+
+---
+
+## Custom 3D A* Pathfinding
+
+A* runs over the octree leaf graph using a Euclidean 3D heuristic and a custom graph implementation.
+
+<p align="center">
+  <img src="Documents/Images/gPeMi.png" width="900" />
+</p>
+
+The implementation supports:
 1. Euclidean 3D heuristic
-2. SortedSet-based open list
-3. Search ID reuse (no per-search allocation resets)
+2. SortedSet-based open set
+3. Search-ID reuse to avoid per-search allocations
 4. Iteration safety caps
-5. Best-so-far fallback logic
-6. Runtime penalty injection
+5. Best-so-far fallback (partial solution when needed)
+6. Optional dynamic cost injection (used for traffic avoidance)
 
-Designed for high-frequency multiplayer usage.
+---
 
-# Traffic-Aware Path Diversification
+## Volumetric Path Example (Multi-Level Traversal)
 
-Agents reserve early path segments to prevent congestion.
+A representative example showing how paths can route through 3D volume across different heights and around obstacles.
 
-Features:
-1. Leaf reservation system
-2. Prefix-only path locking
-3. Time-based expiration
-4. Team-based filtering
-5. Deterministic tie-breaking
+<p align="center">
+  <img src="Documents/Images/aerospace-12-00085-g014.png" width="900" />
+</p>
+
+---
+
+## Traffic-Aware Path Diversification
+
+To avoid many agents selecting the same shortest path, the system supports leaf “reservations” that temporarily penalize recently used paths (optionally same-team only).
 
 Result:
-1. Reduced clustering
-2. Natural traffic flow
-3. Emergent movement behavior
+1. Less clustering
+2. Better path variety
+3. More natural agent distribution
 
-# Server-Authoritative Multiplayer Movement
+---
 
-<p align="center"> <img src="Documents/Images/server-authoritative-f91558362b208ca10eae39e25dd9698d.png" width="900"/> </p>
+## Server-Authoritative Physics Movement
 
-Movement is computed exclusively on the server.
+Agents move using Rigidbody motion on the server. Clients receive pose updates and render smooth motion via interpolation.
 
-Architecture characteristics:
-1. Server-side pathfinding
-2. Rigidbody-based physics execution
-3. Client observer interpolation
-4. State replication via synchronized variables
-5. Deterministic tick-based synchronization
+The approach prioritizes:
+1. Correctness (authority)
+2. Stability (no tunneling through obstacles)
+3. Visual smoothness (client interpolation)
 
-Prevents cheating and eliminates client-side authority issues.
+---
 
-# Network Smoothing and Interpolation
+## Network Smoothing and Interpolation
 
-<p align="center"> <img src="Documents/Images/Smoothing-and-interpolation-with-P-splines-solid-black-lines-for-different-numbers-of.png" width="900"/> </p>
+Clients interpolate toward the most recent authoritative server state to reduce jitter and teleport artifacts.
 
-Clients interpolate toward authoritative server state using exponential smoothing.
+<p align="center">
+  <img src="Documents/Images/Smoothing-and-interpolation-with-P-splines-solid-black-lines-for-different-numbers-of.png" width="900" />
+</p>
 
-Benefits:
-1. Eliminates teleport jitter
-2. Reduces visual stutter
-3. Maintains deterministic state alignment
-4. Smooth multi-client rendering
+---
 
-# Behavior Tree AI System
+## Behavior Tree AI
 
-<p align="center"> <img src="Documents/Images/selector1.png" width="900"/> </p>
+AI decision-making is implemented using a behavior tree structure.
 
-AI decision logic is implemented using a behavior tree architecture.
+<p align="center">
+  <img src="Documents/Images/selector1.png" width="900" />
+</p>
 
-Core components:
-1. Selector nodes
-2. Sequence nodes
-3. Blackboard pattern
-4. Objective-driven movement nodes
-5. Idle roaming fallback logic
+An example editor-style view of a selector/sequence layout (used to communicate the structure clearly).
 
-Supports:
-1. Capture point behavior
-2. Repath intervals
-3. Arrival thresholds
-4. State-based transitions
+<p align="center">
+  <img src="Documents/Images/19ee3f120a6df87879aabb765080f8ed8c5a370d_2_690x458.png" width="900" />
+</p>
 
-# Full Octree Visualization
+---
 
-<p align="center"> <img src="Documents/Images/octree_example_screen_mini.png" width="900"/> </p>
+## Blackboard Pattern
 
-Visualization tools allow debugging of:
-1. Octree subdivision levels
-2. Occupied vs empty leaves
-3. Active path nodes
-4. Traffic reservations
-5. Runtime movement validation
+Behavior tree nodes share state through a blackboard pattern. This keeps the AI modular and reduces coupling between systems.
 
-Physics-Based Movement Safety
+<p align="center">
+  <img src="Documents/Images/blackboard-pattern-components.png" width="900" />
+</p>
 
-Each movement step includes:
+A reference-style architecture diagram showing the blackboard concept at a higher level.
+
+<p align="center">
+  <img src="Documents/Images/Blackboard-architecture.png" width="900" />
+</p>
+
+---
+
+## Physics-Based Movement Safety
+
+Each movement step can be validated against obstacle colliders using:
 1. SphereCast sweep checks
-2. Overlap collision validation
+2. Overlap collision checks
 3. Self-collider filtering
 4. Clearance padding
-5. Dynamic repathing when blocked
+5. Fast repath when blocked
 
-Ensures physically valid navigation even in dynamic multiplayer scenarios.
+This keeps movement physically valid in dynamic environments and multiplayer conditions.
 
-# Pathfinding Pipeline
+---
 
-1. Collect obstacle colliders
-2. Build octree
-3. Extract empty leaves
-4. Build adjacency graph
-5. Run A*
-6. Convert leaf path to world waypoints
-7. Reserve path prefix
-8. Execute server-authoritative movement
+## Execution Pipeline
 
-# Performance Considerations
+1. Collect obstacle colliders (inside world bounds)
+2. Build octree (adaptive or full subdivision)
+3. Validate leaves (optional geometry-accurate checks)
+4. Collect navigable leaves
+5. Build graph connectivity (face + adjacency hash)
+6. Run A* (optionally with traffic penalties)
+7. Convert leaf path to world waypoints
+8. Move using server-authoritative Rigidbody steps
+9. Replicate pose to clients and interpolate on observers
+10. Drive AI decisions via behavior tree + blackboard
 
-1. Non-alloc physics queries
-2. Search ID reuse
-3. Spatial hashing
-4. Iteration caps
-5. Dictionary reuse
-6. Configurable leaf limits
+---
 
-Designed for large-scale 3D environments with many simultaneous agents.
+## Code Areas Covered (high level)
 
-# Technologies Used
+- Octree generation, occupancy checks, and graph building
+- Custom A* graph search and waypoint output
+- Agent movement with safety checks and fast repathing
+- Server-authoritative replication + client smoothing
+- Behavior tree AI nodes and event-driven transitions
+- Capture zone controller + manager sync
+- Map generation + AI spawning state flow
+- Steam lobby / UDP connection bootstrapping
+
+---
+
+## Technologies Used
 
 1. Unity (C#)
-2. Custom Octree Implementation
-3. Custom A* Pathfinding
-4. Multiplayer Networking
-5. Behavior Trees
-6. Rigidbody Physics
-7. Deterministic Tick Synchronization
+2. Rigidbody Physics
+3. Custom Octree Implementation
+4. Custom A* Pathfinding
+5. Multiplayer Networking (server authoritative)
+6. Behavior Trees
+7. Blackboard Architecture
