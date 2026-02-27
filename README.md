@@ -242,3 +242,57 @@ This keeps movement physically valid in dynamic environments and multiplayer con
 5. Multiplayer Networking (server authoritative)
 6. Behavior Trees
 7. Blackboard Architecture
+
+## Image Credits / Bibliography
+
+Some images in this README are used for conceptual illustration and were sourced online. All rights belong to their respective owners. Where available, the original page is linked below.
+
+1. `Documents/Images/Spatial-partitioning-of-the-octree-structure-Left-A-voxelized-version-of-the-Stanford.png`  
+   Source: https://www.researchgate.net/figure/Spatial-partitioning-of-the-octree-structure-Left-A-voxelized-version-of-the-Stanford_fig61_268023043
+
+2. `Documents/Images/Figure-Octree-structure-image-a-shows-the-subdivision-in-cubes-image-b-the-tree.png`  
+   Source: https://www.researchgate.net/figure/Figure-Octree-structure-image-a-shows-the-subdivision-in-cubes-image-b-the-tree_fig3_267995345
+
+3. `Documents/Images/Example-of-octree-decomposition.png`  
+   Source: https://www.researchgate.net/figure/Example-of-octree-decomposition_fig4_274645446
+
+4. `Documents/Images/octree_example_screen_mini.png`  
+   Source: https://castle-engine.io/vrml_engine_doc/output/xsl/html/section.how_octree_works.html
+
+5. `Documents/Images/aerospace-12-00085-g014.png`  
+   Source: https://www.mdpi.com/2226-4310/12/2/85
+
+6. `Documents/Images/fig1-1.png`  
+   Source: https://math.hws.edu/eck/metric-spaces/open-and-closed-sets.html
+
+7. `Documents/Images/7F0CZ.png`  
+   Source: https://gamedev.stackexchange.com/questions/93145/a-pathfinding-in-3d
+
+8. `Documents/Images/qapH8.png`  
+   Source: https://stackoverflow.com/questions/37298294/reduce-number-of-nodes-in-3d-a-pathfinding-using-part-of-a-uniform-grid-repre
+
+9. `Documents/Images/server-authoritative-f91558362b208ca10eae39e25dd9698d.png`  
+   Source: https://docs.elympics.ai/gameplay/glossary/server-authoritative/index.html
+
+10. `Documents/Images/Hybrid-architecture-for-client-server-mobile-multiplayer-games.png`  
+    Source: https://www.researchgate.net/figure/Hybrid-architecture-for-client-server-mobile-multiplayer-games_fig1_234797288
+
+11. `Documents/Images/gPeMi.png`  
+    Source: https://stackoverflow.com/questions/39802415/smooth-interpolation-of-my-data
+
+12. `Documents/Images/Smoothing-and-interpolation-with-P-splines-solid-black-lines-for-different-numbers-of.png`  
+    Source: https://www.researchgate.net/figure/Smoothing-and-interpolation-with-P-splines-solid-black-lines-for-different-numbers-of_fig1_281487325
+
+13. `Documents/Images/selector1.png`  
+    Source: https://www.gamedeveloper.com/programming/behavior-trees-for-ai-how-they-work
+
+14. `Documents/Images/19ee3f120a6df87879aabb765080f8ed8c5a370d_2_690x458.png`  
+    Source: https://forums.unrealengine.com/t/how-to-achieve-active-selector-node-functionality-in-ue4-behavior-trees/11585
+
+15. `Documents/Images/blackboard-pattern-components.png`  
+    Source: https://dzone.com/articles/the-blackboard-pattern-for-autonomous-navigation
+
+16. `Documents/Images/Blackboard-architecture.png`  
+    Source: https://www.researchgate.net/figure/Blackboard-architecture_fig2_220955182
+
+    These images are used for documentation/educational context only; they are not part of the project’s original assets.
